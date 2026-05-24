@@ -1,4 +1,5 @@
 import re
+from collections.abc import Callable
 
 from enum import Enum
 from typing import Optional
@@ -25,7 +26,11 @@ class Field:
 
     def __init__(self, name: str, title: str, formular: str = None, group_by: bool = False, hidden: bool = False,
                  group_summary: AggregationType  = None, total_summary: AggregationType = None,
-                 excel_format_def: dict = None):
+                 excel_format_def: dict = None, mapping: Callable = None):
+
+        assert not (formular is not None and group_by), "Group by a formular is not allowed"
+        assert not (formular is not None and mapping is not None), "Mapping ony for explicit Data"
+
         self.name: str = name
         self.title: str = title
         self.formular: str = formular
@@ -34,16 +39,15 @@ class Field:
         self.group_summary: Field.AggregationType= group_summary
         self.total_summary: Field.AggregationType = total_summary
         self.excel_format_def: dict = excel_format_def
+        self.mapping: Callable = (lambda x: x) if mapping is None else mapping
         self.excel_format: Optional[Format] = None
         self.excel_format_group_summary: Optional[Format] = None
         self.excel_format_total_summary: Optional[Format] = None
         self.idx_code: Optional[str] = None
 
-        assert not (self.formular is not None and  self.group_by), "Group by a formular is not allowed"
-
     def write(self, worksheet: Worksheet, i: int, j: int, row: dict, ef: Format) -> None:
         if self.formular is None:
-            worksheet.write(i, j, row[self.name], ef)
+            worksheet.write(i, j, self.mapping(row[self.name]), ef)
         else:
             worksheet.write_formula(i, j, self.parse_formular(i, j), ef)
 
