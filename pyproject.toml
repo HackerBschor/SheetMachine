@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "SheetMachine"
-version = "0.1.0"
+version = "0.1.01"
 description = "Create XLSX files from data"
 readme = "README.md"
 authors = [{name = "Nicolas Bschor"}]
